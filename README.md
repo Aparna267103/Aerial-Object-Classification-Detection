@@ -1,362 +1,717 @@
-# Aerial Object Classification & Detection
+# 🛰️ Aerial Object Classification & Detection
 
-An end-to-end deep learning project for **classifying aerial images as Bird or Drone**, with an optional **YOLOv8-based object detection** component for locating and labeling objects in real-world aerial scenes.
+A Deep Learning and Computer Vision project for classifying aerial images into two categories — **Bird 🐦** and **Drone 🚁**.
 
-The project combines computer vision, deep learning, transfer learning, data augmentation, model evaluation, and Streamlit deployment to address practical applications in aerial surveillance, wildlife monitoring, airport safety, and airspace security.
+The project implements a **Custom CNN** and a **Transfer Learning model** for image classification, evaluates their performance using standard classification metrics, compares both models, and deploys the best-performing model through an interactive **Streamlit** web application.
 
-## 🚀 Project Overview
+> **Domain:** Aerial Surveillance, Wildlife Monitoring, Security & Defense
 
-Accurately distinguishing birds from drones in aerial imagery is important for applications such as:
+---
 
-* 🦅 Wildlife protection and monitoring
-* 🛡️ Security and defense surveillance
-* ✈️ Airport bird-strike prevention
-* 🌱 Environmental research
-* 🚨 Airspace safety
+## 📌 Project Overview
 
-The project includes two primary computer vision tasks:
+Aerial images can contain objects such as birds and drones that may look visually similar, especially from a distance. Accurate identification is important in applications such as wildlife monitoring, airport safety, restricted-airspace surveillance, and environmental research.
 
-1. **Image Classification** — Binary classification of aerial images into `Bird` or `Drone`.
-2. **Object Detection (Optional)** — YOLOv8 detection of birds and drones with bounding boxes.
+This project uses Deep Learning and Computer Vision techniques to distinguish between:
 
-## 🧠 Key Features
+* 🐦 **Bird**
+* 🚁 **Drone**
 
-* Custom CNN for image classification
-* Transfer learning using pretrained architectures
-* Data preprocessing and augmentation
-* Model training with EarlyStopping and ModelCheckpoint
-* Accuracy, Precision, Recall, and F1-score evaluation
-* Confusion matrix and classification report
-* Training/validation accuracy and loss visualization
-* Optional YOLOv8 object detection
-* Interactive Streamlit application
-* Prediction confidence display
-* Optional bounding-box visualization for detected objects
+The project workflow includes:
 
-## 🛠️ Tech Stack
+```text
+Dataset
+   ↓
+Data Preprocessing
+   ↓
+Data Augmentation
+   ↓
+Custom CNN
+   ↓
+Transfer Learning
+   ↓
+Model Training
+   ↓
+Model Evaluation
+   ↓
+Model Comparison
+   ↓
+Best Model
+   ↓
+Streamlit Deployment
+```
 
-* **Python**
-* **TensorFlow / Keras or PyTorch**
-* **Computer Vision**
-* **CNN**
-* **Transfer Learning**
-* **YOLOv8** *(optional)*
-* **OpenCV**
-* **NumPy**
-* **Pandas**
-* **Matplotlib**
-* **Scikit-learn**
-* **Streamlit**
+The project specification also includes **YOLOv8-based object detection as an optional extension**.
 
-The project specification identifies Deep Learning, Computer Vision, Python, TensorFlow/Keras or PyTorch, data augmentation, YOLOv8, model evaluation, and Streamlit deployment as the main technical areas.
+---
+
+## 🎯 Objectives
+
+The main objectives of this project are:
+
+1. Build a binary image classification system for Bird vs Drone.
+2. Preprocess and normalize aerial images.
+3. Apply image augmentation to improve model generalization.
+4. Develop a Custom CNN classification model.
+5. Implement Transfer Learning using a pretrained deep learning model.
+6. Train and validate both models.
+7. Evaluate model performance using:
+
+   * Accuracy
+   * Precision
+   * Recall
+   * F1-score
+   * Confusion Matrix
+8. Compare the Custom CNN and Transfer Learning models.
+9. Select the best-performing model.
+10. Deploy the classifier using Streamlit.
+11. Optionally extend the project using YOLOv8 for object detection.
+
+---
+
+## 🛠️ Technologies Used
+
+| Technology   | Purpose                                   |
+| ------------ | ----------------------------------------- |
+| Python       | Programming language                      |
+| TensorFlow   | Deep Learning framework                   |
+| Keras        | Neural network development                |
+| NumPy        | Numerical and image-array processing      |
+| Pillow       | Image processing                          |
+| Scikit-learn | Model evaluation                          |
+| Matplotlib   | Visualization                             |
+| Seaborn      | Confusion matrix visualization            |
+| Pandas       | Result analysis                           |
+| Streamlit    | Web application deployment                |
+| MobileNetV2  | Transfer Learning                         |
+| YOLOv8       | Optional object detection                 |
+| Git & GitHub | Version control and project documentation |
+
+---
 
 ## 📂 Dataset
 
-### Classification Dataset
+The project uses a binary classification dataset containing RGB `.jpg` images.
 
-The classification dataset contains RGB `.jpg` images divided into training, validation, and test sets.
-
-| Split      |  Bird | Drone |
-| ---------- | ----: | ----: |
-| Train      | 1,414 | 1,248 |
-| Validation |   217 |   225 |
-| Test       |   121 |    94 |
-
-**Task:** Binary image classification — `Bird` vs `Drone`.
-
-### Object Detection Dataset
-
-The optional object detection dataset contains **3,319 images** with corresponding YOLOv8-format `.txt` annotations.
-
-Each annotation follows:
+### Classification Dataset Structure
 
 ```text
-<class_id> <x_center> <y_center> <width> <height>
+dataset/
+│
+├── train/
+│   ├── bird/
+│   └── drone/
+│
+├── valid/
+│   ├── bird/
+│   └── drone/
+│
+└── test/
+    ├── bird/
+    └── drone/
 ```
 
-Dataset split:
+### Dataset Distribution
 
-| Split      | Images |
-| ---------- | -----: |
-| Train      |  2,662 |
-| Validation |    442 |
-| Test       |    215 |
+| Split      | Bird | Drone |
+| ---------- | ---: | ----: |
+| Train      | 1414 |  1248 |
+| Validation |  217 |   225 |
+| Test       |  121 |    94 |
 
-> **Note:** The project specification identifies the dataset sources as `classification_dataset` and `object_detection_Dataset`.
+The dataset distribution above follows the project specification.
 
-## 🔄 Project Workflow
+---
 
-### 1. Dataset Exploration
+## 🔄 Data Preprocessing
 
-* Inspect dataset structure
-* Count images in each class
-* Check for class imbalance
-* Visualize sample images
+Before training, all images are converted to a fixed input size:
 
-### 2. Data Preprocessing
+```text
+224 × 224 × 3
+```
 
-For classification:
+where:
 
-* Resize images to **224 × 224**
-* Normalize pixel values to `[0, 1]`
-* Apply model-specific preprocessing for transfer-learning architectures
-* Use ImageNet normalization where required for PyTorch pretrained models
+* `224` → image height
+* `224` → image width
+* `3` → RGB channels
 
-### 3. Data Augmentation
+### Pixel Normalization
 
-To improve model generalization, the project uses transformations such as:
+Original image pixel values:
+
+```text
+0 – 255
+```
+
+are normalized to:
+
+```text
+0 – 1
+```
+
+using:
+
+```python
+image = image / 255.0
+```
+
+Normalization helps provide a consistent input range for the neural network.
+
+---
+
+## 🔀 Data Augmentation
+
+Data augmentation is applied to training images to introduce variations and improve model generalization.
+
+The following transformations are used:
 
 * Rotation
-* Horizontal/vertical flipping
 * Zoom
-* Brightness adjustment
-* Cropping
+* Horizontal flipping
 
-### 4. Model Development
+Example:
 
-#### Custom CNN
+```python
+ImageDataGenerator(
+    rescale=1.0 / 255,
+    rotation_range=20,
+    zoom_range=0.2,
+    horizontal_flip=True
+)
+```
 
-The custom CNN can include:
+Validation and test images are normalized but are not augmented.
 
-* Convolutional layers
-* Pooling layers
-* Batch normalization
-* Dropout
-* Dense output layer
+---
 
-#### Transfer Learning
+# 🧠 Model 1 — Custom CNN
 
-Pretrained architectures such as:
+The first model is a custom Convolutional Neural Network.
 
-* ResNet50
-* MobileNet
-* EfficientNetB0
-
-can be loaded and fine-tuned for the Bird/Drone classification task.
-
-### 5. Model Training
-
-Models are trained using:
-
-* EarlyStopping
-* ModelCheckpoint
-* Accuracy
-* Precision
-* Recall
-* F1-score
-
-### 6. Model Evaluation
-
-Performance is evaluated using:
-
-* Confusion matrix
-* Classification report
-* Accuracy/loss curves
-* Generalization performance
-* Training time
-
-The best-performing model is selected for deployment.
-
-### 7. Optional YOLOv8 Detection
-
-The object detection pipeline consists of:
-
-1. Install YOLOv8
-2. Prepare the YOLOv8-format dataset
-3. Create `data.yaml`
-4. Train the detection model
-5. Validate the model
-6. Run inference on test/new images
-
-## 🌐 Streamlit Application
-
-The trained model can be deployed through a Streamlit web interface.
-
-The application allows users to:
-
-1. Upload an aerial image.
-2. Run the trained classification model.
-3. View the predicted class:
-
-   * `Bird`
-   * `Drone`
-4. View the model's confidence score.
-5. Optionally view YOLOv8 detection results with bounding boxes.
-
-## 📁 Suggested Repository Structure
+### Architecture
 
 ```text
-Aerial-Object-Classification-Detection/
+Input Image
+224 × 224 × 3
+      ↓
+Conv2D — 32 filters
+      ↓
+MaxPooling
+      ↓
+Conv2D — 64 filters
+      ↓
+MaxPooling
+      ↓
+Conv2D — 128 filters
+      ↓
+MaxPooling
+      ↓
+Flatten
+      ↓
+Dense — 128 neurons
+      ↓
+Dropout — 0.5
+      ↓
+Sigmoid Output
+      ↓
+Bird / Drone
+```
+
+### Key Components
+
+#### Convolutional Layers
+
+Convolution layers extract visual features such as:
+
+* Edges
+* Shapes
+* Textures
+* Object patterns
+
+#### Max Pooling
+
+Max pooling reduces spatial dimensions while retaining important features.
+
+#### Flatten
+
+Converts the extracted feature maps into a one-dimensional vector.
+
+#### Dense Layer
+
+Combines the extracted features for classification.
+
+#### Dropout
+
+A dropout rate of `0.5` is used to reduce overfitting during training.
+
+#### Sigmoid Output
+
+Since this is a binary classification problem, the final layer contains one neuron with a sigmoid activation function.
+
+```python
+Dense(1, activation="sigmoid")
+```
+
+---
+
+# 🚀 Model 2 — Transfer Learning
+
+The second approach uses a pretrained **MobileNetV2** model.
+
+The pretrained convolutional base is used as a feature extractor, followed by custom classification layers.
+
+### Architecture
+
+```text
+Input Image
+224 × 224 × 3
+      ↓
+Pretrained MobileNetV2
+      ↓
+Global Average Pooling
+      ↓
+Dense — 128 neurons
+      ↓
+Dropout — 0.5
+      ↓
+Sigmoid Output
+      ↓
+Bird / Drone
+```
+
+### Why Transfer Learning?
+
+Transfer Learning allows the project to make use of features learned by a model trained on a large image dataset.
+
+The pretrained MobileNetV2 base is initially frozen while the classification layers are trained for the Bird vs Drone task.
+
+---
+
+# 🏋️ Model Training
+
+Both models are trained using:
+
+```text
+Optimizer  → Adam
+Loss       → Binary Crossentropy
+Metric     → Accuracy
+```
+
+### Training Techniques
+
+The project uses:
+
+* Data augmentation
+* Validation data
+* EarlyStopping
+* ModelCheckpoint
+
+### EarlyStopping
+
+Training can stop when validation performance stops improving, helping reduce unnecessary training and overfitting.
+
+### ModelCheckpoint
+
+The best-performing model based on validation accuracy is saved for later evaluation and deployment.
+
+---
+
+# 📊 Model Evaluation
+
+After training, both models are evaluated using the independent test dataset.
+
+The following metrics are calculated:
+
+### Accuracy
+
+Measures the overall percentage of correctly classified images.
+
+### Precision
+
+Measures how many predicted positive samples are actually positive.
+
+### Recall
+
+Measures how many actual positive samples are correctly identified.
+
+### F1-score
+
+Provides a balance between precision and recall.
+
+### Confusion Matrix
+
+Shows:
+
+```text
+                 Predicted
+              Bird     Drone
+
+Actual Bird
+Actual Drone
+```
+
+This helps identify which class the model is confusing.
+
+---
+
+# 📈 Model Comparison
+
+The Custom CNN and Transfer Learning models are compared based on their test performance.
+
+The comparison includes:
+
+| Metric          |       Custom CNN | Transfer Learning |
+| --------------- | ---------------: | ----------------: |
+| Accuracy        | To be calculated |  To be calculated |
+| Precision       | To be calculated |  To be calculated |
+| Recall          | To be calculated |  To be calculated |
+| F1-score        | To be calculated |  To be calculated |
+| Prediction Time | To be calculated |  To be calculated |
+
+> The final values should be updated after running `evaluate.py` on the actual dataset.
+
+The best-performing model is selected for Streamlit deployment based on the evaluation results.
+
+---
+
+# 📁 Project Structure
+
+```text
+Aerial-Object-Classification/
 │
-├── data/
-│   ├── classification_dataset/
-│   │   ├── train/
-│   │   │   ├── bird/
-│   │   │   └── drone/
-│   │   ├── valid/
-│   │   │   ├── bird/
-│   │   │   └── drone/
-│   │   └── test/
-│   │       ├── bird/
-│   │       └── drone/
-│   │
-│   └── object_detection_Dataset/
-│       ├── images/
-│       ├── labels/
-│       └── data.yaml
-│
-├── notebooks/
-│   ├── data_exploration.ipynb
-│   ├── cnn_classification.ipynb
-│   ├── transfer_learning.ipynb
-│   └── yolov8_detection.ipynb
-│
-├── src/
-│   ├── preprocessing.py
-│   ├── train.py
-│   ├── evaluate.py
-│   └── predict.py
+├── dataset/
+│   ├── train/
+│   │   ├── bird/
+│   │   └── drone/
+│   ├── valid/
+│   │   ├── bird/
+│   │   └── drone/
+│   └── test/
+│       ├── bird/
+│       └── drone/
 │
 ├── models/
-│   ├── custom_cnn/
-│   ├── transfer_learning/
-│   └── yolov8/
-│
-├── app/
-│   └── streamlit_app.py
+│   ├── custom_cnn_best.keras
+│   └── transfer_learning_best.keras
 │
 ├── results/
-│   ├── confusion_matrix.png
-│   ├── training_curves.png
-│   └── classification_report.txt
+│   ├── custom_cnn_accuracy.png
+│   ├── custom_cnn_loss.png
+│   ├── transfer_learning_accuracy.png
+│   ├── transfer_learning_loss.png
+│   ├── custom_cnn_confusion_matrix.png
+│   ├── transfer_learning_confusion_matrix.png
+│   └── model_comparison.csv
 │
+├── train.py
+├── train_transfer.py
+├── evaluate.py
+├── predict.py
+├── app.py
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
-*This is a suggested GitHub organization; the source project specification requires trained models, a Streamlit application, scripts/notebooks, evaluation/model comparison documentation, and a well-structured GitHub repository, but does not prescribe this exact folder structure.*
+---
 
-## ⚙️ Installation
+# ▶️ Installation
 
-Clone the repository:
+## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/Aerial-Object-Classification-Detection.git
-cd Aerial-Object-Classification-Detection
+git clone <YOUR_GITHUB_REPOSITORY_URL>
 ```
 
-Create and activate a virtual environment:
+Move into the project directory:
+
+```bash
+cd Aerial-Object-Classification
+```
+
+---
+
+## 2. Create a Virtual Environment
+
+### Windows
 
 ```bash
 python -m venv venv
-```
-
-Windows:
-
-```bash
 venv\Scripts\activate
 ```
 
-Linux/macOS:
+### Linux / macOS
 
 ```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
-Install dependencies:
+---
+
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## ▶️ Running the Streamlit App
+---
 
-After training and saving the best-performing model:
+# 🏃 Running the Project
+
+## Step 1 — Train Custom CNN
 
 ```bash
-streamlit run app/streamlit_app.py
+python train.py
 ```
 
-Then open the local Streamlit URL displayed in the terminal.
+The trained model will be saved as:
 
-Upload an aerial image to receive a **Bird/Drone prediction and confidence score**. If YOLOv8 detection has been implemented, the application can additionally display detected objects with bounding boxes.
+```text
+models/custom_cnn_best.keras
+```
 
-## 📊 Model Comparison
+Training graphs will be saved inside:
 
-The project compares the developed classification models using:
-
-| Metric         | Custom CNN | Transfer Learning |
-| -------------- | ---------- | ----------------- |
-| Accuracy       | —          | —                 |
-| Precision      | —          | —                 |
-| Recall         | —          | —                 |
-| F1-Score       | —          | —                 |
-| Training Time  | —          | —                 |
-| Generalization | —          | —                 |
-
-Replace the placeholders with the **actual experimental results** after training. The project specification requires comparison based on accuracy, training time, and generalization performance.
-
-## 🎯 Applications
-
-### Wildlife Protection
-
-Identify birds around wind farms and airports to help reduce potential accidents.
-
-### Security & Defense
-
-Detect drones operating in restricted airspace and support timely surveillance alerts.
-
-### Airport Safety
-
-Monitor runway and surrounding areas for bird activity to support bird-strike prevention.
-
-### Environmental Research
-
-Use aerial imagery to monitor bird populations while reducing bird/drone misclassification.
-
-## 📌 Project Deliverables
-
-* [ ] Trained Custom CNN model
-* [ ] Trained Transfer Learning model
-* [ ] YOLOv8 model *(optional)*
-* [ ] Streamlit classification/detection application
-* [ ] Preprocessing and training scripts/notebooks
-* [ ] Evaluation results
-* [ ] Model comparison report
-* [ ] Well-structured and commented code
-* [ ] GitHub documentation
-
-These deliverables follow the project specification.
-
-## 🧪 Future Improvements
-
-Potential extensions include:
-
-* Real-time video detection
-* Additional aerial-object classes
-* Improved model optimization
-* Edge-device deployment
-* Real-time surveillance alerts
-* Larger and more diverse aerial datasets
-* Further YOLOv8 optimization
-
-## 🏷️ Technical Tags
-
-`Computer Vision` · `Deep Learning` · `Image Classification` · `Object Detection` · `CNN` · `YOLOv8` · `Transfer Learning` · `Data Augmentation` · `Model Evaluation` · `Streamlit` · `Aerial Surveillance AI`
-
-## 👨‍💻 Author
-
-Aparna V
+```text
+results/
+```
 
 ---
 
-## 📄 Project Reference
+## Step 2 — Train Transfer Learning Model
 
-**Project:** Aerial Object Classification & Detection
+```bash
+python train_transfer.py
+```
 
-**Domain:** Aerial Surveillance, Wildlife Monitoring, Security & Defense
+The trained model will be saved as:
 
-**Primary Tasks:** Bird/Drone Image Classification + Optional Object Detection
+```text
+models/transfer_learning_best.keras
+```
 
-**Deployment:** Streamlit
+---
+
+## Step 3 — Evaluate Both Models
+
+```bash
+python evaluate.py
+```
+
+The evaluation results and confusion matrices will be generated in:
+
+```text
+results/
+```
+
+The model comparison will be saved as:
+
+```text
+results/model_comparison.csv
+```
+
+---
+
+## Step 4 — Predict a Single Image
+
+```bash
+python predict.py path/to/image.jpg
+```
+
+Example:
+
+```bash
+python predict.py dataset/test/bird/sample.jpg
+```
+
+Example output:
+
+```text
+Prediction: Bird
+Confidence: 94.31%
+```
+
+---
+
+# 🌐 Streamlit Application
+
+Start the Streamlit application using:
+
+```bash
+streamlit run app.py
+```
+
+The application allows the user to:
+
+1. Upload an image.
+2. View the uploaded image.
+3. Preprocess the image.
+4. Run the trained model.
+5. Display the predicted class.
+6. Display the prediction confidence.
+
+Example:
+
+```text
+┌──────────────────────────────────┐
+│   🛰️ Bird vs Drone Classifier   │
+│                                  │
+│      Upload Image                │
+│                                  │
+│       [ Choose File ]            │
+│                                  │
+│      🐦 Bird Detected            │
+│      Confidence: 94.31%          │
+└──────────────────────────────────┘
+```
+
+---
+
+# 🎯 Applications
+
+The project can be applied to several real-world scenarios.
+
+### 🦅 Wildlife Protection
+
+Monitoring birds near airports or wind farms to help reduce potential accidents.
+
+### 🛡️ Security & Defense
+
+Identifying drones operating in restricted airspace.
+
+### ✈️ Airport Safety
+
+Monitoring runway areas for bird activity and supporting bird-strike prevention.
+
+### 🌱 Environmental Research
+
+Monitoring bird populations using aerial imagery.
+
+---
+
+# 🔍 Optional — YOLOv8 Object Detection
+
+The project specification also provides an optional object detection component using YOLOv8.
+
+Unlike classification, object detection identifies both:
+
+```text
+What is the object?
++
+Where is the object?
+```
+
+Example:
+
+```text
+Image
+  ↓
+YOLOv8
+  ↓
+┌─────────────────────┐
+│       DRONE         │
+│                     │
+└─────────────────────┘
+```
+
+The object detection dataset contains YOLO-format annotations:
+
+```text
+<class_id> <x_center> <y_center> <width> <height>
+```
+
+The YOLOv8 extension can be added as a separate detection module.
+
+---
+
+# ⚠️ Classification vs Object Detection
+
+| Feature                | Classification          | Object Detection     |
+| ---------------------- | ----------------------- | -------------------- |
+| Identifies object      | ✅                       | ✅                    |
+| Locates object         | ❌                       | ✅                    |
+| Output                 | Bird / Drone            | Class + Bounding Box |
+| Model used             | CNN / Transfer Learning | YOLOv8               |
+| Current implementation | ✅                       | Optional             |
+
+---
+
+# 📌 Key Learning Outcomes
+
+Through this project, the following concepts are demonstrated:
+
+* Computer Vision
+* Deep Learning
+* Convolutional Neural Networks
+* Binary Image Classification
+* Transfer Learning
+* Image Preprocessing
+* Image Normalization
+* Data Augmentation
+* Model Training
+* EarlyStopping
+* ModelCheckpoint
+* Performance Evaluation
+* Confusion Matrix
+* Precision
+* Recall
+* F1-score
+* Model Comparison
+* Streamlit Deployment
+* Optional YOLOv8 Object Detection
+
+---
+
+# 📋 Project Deliverables
+
+The project produces:
+
+* Custom CNN trained model
+* Transfer Learning trained model
+* Evaluation results
+* Confusion matrices
+* Accuracy and loss plots
+* Model comparison results
+* Single-image prediction script
+* Streamlit application
+* Project documentation
+
+---
+
+# 🚀 Future Enhancements
+
+Possible improvements include:
+
+* YOLOv8 real-time object detection
+* Bounding-box visualization
+* Video-based detection
+* Real-time webcam/stream processing
+* Additional aerial object classes
+* Model fine-tuning
+* Improved confidence calibration
+* Deployment to a cloud platform
+
+---
+
+# 👨‍💻 Author
+
+Aparna V
+
+Aerial Object Classification & Detection
+Deep Learning | Computer Vision | TensorFlow | Streamlit
+
+---
+
+# ⭐ Acknowledgement
+
+This project was developed as a Deep Learning and Computer Vision project focused on aerial object classification and detection.
+
+The project specification covers aerial surveillance, wildlife monitoring, security and defense, airport bird-strike prevention, environmental research, and optional YOLOv8 object detection.
+
+---
+
+## 📄 License
+
+This project is intended for educational and project demonstration purposes.
